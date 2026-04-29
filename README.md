@@ -20,7 +20,7 @@ To get started with the AI-Powered Mock Interview Platform, follow these steps:
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/modamaan/Ai-mock-Interview.git
+   git clone https://github.com/nikkx01/Ai-mock-Interview.git
 
 2. Navigate to the project directory:
    ```bash
@@ -46,11 +46,6 @@ To use the AI-Powered Mock Interview Platform, follow these guidelines:
 - Start Interview: Begin your mock interview and respond to the AI-generated questions.
 - Receive Feedback: After completing the interview, get detailed feedback and insights to improve.
 - Review Recent Interviews: Access your most recent interviews directly from the home page for quick review and continued improvement.
-
-## Feedback
-
-If you have any feedback, please reach me at [mohamedamaan319@gmail.com](mailto:mohamedamaan319@gmail.com) or connect with me on [LinkedIn](https://www.linkedin.com/in/mohamedamaan319/).
-
 
 ## Contributing
 Contributions are welcome! If you'd like to contribute to this project, please follow these steps:
