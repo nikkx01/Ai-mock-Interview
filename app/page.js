@@ -104,15 +104,15 @@ const page = () => {
                   <p className="text-gray-600">
                     "The AI mock interviews were incredibly helpful. I felt much more confident going into my real interview."
                   </p>
-                  <h4 className="mt-4 text-lg font-semibold text-blue-600">- Alex Johnson</h4>
+                  <h4 className="mt-4 text-lg font-semibold text-blue-600">- Vivek Raj</h4>
                 </div>
               </div>
               <div className="w-full md:w-1/2 px-4 py-8">
                 <div className="bg-white rounded-lg p-6 shadow-md">
                   <p className="text-gray-600">
-                    "The feedback was spot on and helped me improve my answers. Highly recommend this service!"
+                    "Practicing with this platform improved my interview performance and helped me secure a high-paying offer."
                   </p>
-                  <h4 className="mt-4 text-lg font-semibold text-blue-600">- Sarah Williams</h4>
+                  <h4 className="mt-4 text-lg font-semibold text-blue-600">- Yash Sharma</h4>
                 </div>
               </div>
             </div>

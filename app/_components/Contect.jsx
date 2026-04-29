@@ -61,7 +61,7 @@ const Contect = () => {
             <Input
               id="contact-name"
               type="text"
-              placeholder="Jane Smith"
+              placeholder="Nikhil Anand"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -72,7 +72,7 @@ const Contect = () => {
             <Input
               id="contact-email"
               type="email"
-              placeholder="jane@example.com"
+              placeholder="nikhil@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
