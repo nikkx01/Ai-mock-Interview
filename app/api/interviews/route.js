@@ -24,17 +24,37 @@ export async function POST(request) {
       );
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON request body" }, { status: 400 });
+    }
+
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
+
     const { jobPosition, jobDesc, jobExperience } = body;
 
     // Validate
-    if (!jobPosition?.trim() || !jobDesc?.trim() || !jobExperience?.trim()) {
+    if (
+      typeof jobPosition !== "string" ||
+      typeof jobDesc !== "string" ||
+      !["string", "number"].includes(typeof jobExperience)
+    ) {
+      return NextResponse.json({ error: "Invalid field types" }, { status: 400 });
+    }
+
+    const experienceInput = String(jobExperience).trim();
+    if (!jobPosition.trim() || !jobDesc.trim() || !experienceInput) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
-    const expNum = parseInt(jobExperience);
-    if (isNaN(expNum) || expNum < 0 || expNum > 50) {
+
+    const expNum = Number(experienceInput);
+    if (!Number.isInteger(expNum) || expNum < 0 || expNum > 50) {
       return NextResponse.json(
-        { error: "Years of experience must be between 0 and 50" },
+        { error: "Years of experience must be a whole number between 0 and 50" },
         { status: 400 }
       );
     }
@@ -44,7 +64,14 @@ export async function POST(request) {
       str.replace(/[<>{}]/g, "").trim().substring(0, 500);
     const position = sanitize(jobPosition);
     const description = sanitize(jobDesc);
-    const experience = sanitize(jobExperience);
+    const experience = String(expNum);
+
+    if (!position || !description) {
+      return NextResponse.json(
+        { error: "Job position and description must contain valid text" },
+        { status: 400 }
+      );
+    }
 
     // Generate questions with Gemini
     const prompt = `Generate 5 interview questions and answers for:
@@ -64,7 +91,7 @@ Keep questions professional and relevant to the job requirements.`;
 
     const session = createChatSession();
     const aiResult = await session.sendMessage(prompt);
-    let responseText = aiResult.response.text();
+    const responseText = aiResult.response.text();
 
     // Clean and validate JSON
     const cleanedResponse = responseText
@@ -90,13 +117,27 @@ Keep questions professional and relevant to the job requirements.`;
       );
     }
 
+    const normalizedQuestions = [];
     for (const item of parsedQuestions) {
-      if (!item.Question || !item.Answer) {
+      if (
+        !item ||
+        typeof item !== "object" ||
+        Array.isArray(item) ||
+        typeof item.Question !== "string" ||
+        typeof item.Answer !== "string" ||
+        !item.Question.trim() ||
+        !item.Answer.trim()
+      ) {
         return NextResponse.json(
           { error: "Invalid question format from AI. Please try again." },
           { status: 502 }
         );
       }
+
+      normalizedQuestions.push({
+        Question: item.Question.trim(),
+        Answer: item.Answer.trim(),
+      });
     }
 
     // Save to DB
@@ -106,7 +147,7 @@ Keep questions professional and relevant to the job requirements.`;
 
     await db.insert(MockInterview).values({
       mockId,
-      jsonMockResp: cleanedResponse,
+      jsonMockResp: JSON.stringify(normalizedQuestions),
       jobPosition: position,
       jobDesc: description,
       jobExperience: experience,
