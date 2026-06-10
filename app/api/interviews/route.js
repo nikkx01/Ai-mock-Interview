@@ -6,6 +6,40 @@ import { createChatSession } from "@/utils/GeminiAIModal";
 import { rateLimit } from "@/utils/rateLimit";
 import { v4 as uuidv4 } from "uuid";
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const interviewModels = [
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash",
+];
+
+async function generateInterviewQuestions(prompt, maxAttempts = 2) {
+  let lastError;
+
+  for (const modelName of interviewModels) {
+    const session = createChatSession(modelName);
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      try {
+        return await session.sendMessage(prompt);
+      } catch (error) {
+        lastError = error;
+        const isTemporaryFailure = error?.status === 429 || error?.status === 503;
+
+        if (!isTemporaryFailure) {
+          throw error;
+        }
+
+        if (attempt < maxAttempts) {
+          await sleep(500 * 2 ** (attempt - 1));
+        }
+      }
+    }
+  }
+
+  throw lastError;
+}
+
 // POST /api/interviews — generate questions via Gemini and save interview
 export async function POST(request) {
   try {
@@ -89,8 +123,7 @@ Please provide a valid JSON array with this exact format:
 
 Keep questions professional and relevant to the job requirements.`;
 
-    const session = createChatSession();
-    const aiResult = await session.sendMessage(prompt);
+    const aiResult = await generateInterviewQuestions(prompt);
     const responseText = aiResult.response.text();
 
     // Clean and validate JSON
@@ -158,6 +191,14 @@ Keep questions professional and relevant to the job requirements.`;
     return NextResponse.json({ mockId }, { status: 201 });
   } catch (error) {
     console.error("[POST /api/interviews]", error);
+
+    if (error?.status === 429 || error?.status === 503) {
+      return NextResponse.json(
+        { error: "The AI service is busy right now. Please try again in a moment." },
+        { status: 503, headers: { "Retry-After": "10" } }
+      );
+    }
+
     return NextResponse.json(
       { error: "Failed to create interview. Please try again." },
       { status: 500 }

@@ -6,10 +6,7 @@ const {
 
 const apiKey = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey);
-
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
-});
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const generationConfig = {
   temperature: 1,
@@ -36,6 +33,7 @@ export const chatSession = model.startChat({
 });
 
 // Helper: create a fresh chat session for isolated API route calls
-export const createChatSession = () =>
-  model.startChat({ generationConfig, safetySettings });
-
+export const createChatSession = (modelName = "gemini-2.5-flash") =>
+  genAI
+    .getGenerativeModel({ model: modelName })
+    .startChat({ generationConfig, safetySettings });
